@@ -9,8 +9,10 @@ import (
 )
 
 type Point struct {
-    x float64
-    y float64
+    latitude float64
+    longitude float64
+    x int
+    y int
 }
 
 func check(e error) {
@@ -21,10 +23,14 @@ func check(e error) {
 
 func main() {
     var filename string
+    var resolutionX int
+    var resolutionY int
     var points = make([]Point, 0)
 
     // Get the flags
     flag.StringVar(&filename, "i", "", "Filename")
+    flag.IntVar(&resolutionX, "width", 1920, "Width")
+    flag.IntVar(&resolutionY, "height", 1080, "Height")
     flag.Parse()
 
     if filename == "" {
@@ -41,12 +47,16 @@ func main() {
     check(err)
 
     // Grab the points and stick them in a slice for processing
+    // We'll also keep a copy of the original lat/longs, just in case
+    // X and Y are decimal shifted and then cast to ints to preserve accuracy
     for _, track := range gpxFile.Tracks {
         for _, segment := range track.Segments {
             for _, point := range segment.Points {
                 points = append(points, Point{
-                    x: point.Latitude,
-                    y: point.Longitude,
+                    latitude: point.Latitude,
+                    longitude: point.Longitude,
+                    x: int(point.Latitude * 100000),
+                    y: int(point.Longitude * 100000),
                 })
             }
         }
@@ -67,13 +77,10 @@ func main() {
     }
 
     // Now loop through and subtract the mins from each point
-
     for i := 0; i < len(points); i++ {
         points[i].x = points[i].x - minX
         points[i].y = points[i].y - minY
     }
-
-    fmt.Print(points)
 
     // Now find the maxes so we can increase up to our desired image size
     var maxX = points[0].x
@@ -88,6 +95,17 @@ func main() {
         }
     }
 
-    fmt.Print(maxX)
-    fmt.Print(maxY)
+    var scaleX = float64(resolutionX) / float64(maxX)
+    var scaleY = float64(resolutionY) / float64(maxY)
+
+    var finalScale = scaleX
+
+    if(scaleY < finalScale) {
+        finalScale = scaleY
+    }
+
+    for _, point := range points {
+        point.x = int(float64(point.x) * finalScale)
+        point.y = int(float64(point.y) * finalScale)
+    }
 }
