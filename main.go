@@ -6,6 +6,7 @@ import (
     "fmt"
     "os"
     "io/ioutil"
+    "math"
 )
 
 type Point struct {
@@ -56,7 +57,7 @@ func main() {
                     latitude: point.Latitude,
                     longitude: point.Longitude,
                     x: int(point.Latitude * 100000),
-                    y: int(point.Longitude * 100000),
+                    y: int((math.Cos(point.Latitude * (math.Pi / 180)) * point.Longitude) * 100000),
                 })
             }
         }
