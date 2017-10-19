@@ -7,13 +7,16 @@ import (
     "os"
     "io/ioutil"
     "math"
+    "github.com/llgcode/draw2d/draw2dimg"
+    "image"
+    "image/color"
 )
 
 type Point struct {
     latitude float64
     longitude float64
-    x int
-    y int
+    x float64
+    y float64
 }
 
 func check(e error) {
@@ -49,15 +52,16 @@ func main() {
 
     // Grab the points and stick them in a slice for processing
     // We'll also keep a copy of the original lat/longs, just in case
-    // X and Y are decimal shifted and then cast to ints to preserve accuracy
+    // x has some magic applied to get the true width based on latitude
+    // y is flipped to match the image output
     for _, track := range gpxFile.Tracks {
         for _, segment := range track.Segments {
             for _, point := range segment.Points {
                 points = append(points, Point{
                     latitude: point.Latitude,
                     longitude: point.Longitude,
-                    x: int(point.Latitude * 100000),
-                    y: int((math.Cos(point.Latitude * (math.Pi / 180)) * point.Longitude) * 100000),
+                    x: math.Cos(point.Latitude * (math.Pi / 180)) * point.Longitude,
+                    y: point.Latitude * -1,
                 })
             }
         }
@@ -96,8 +100,9 @@ func main() {
         }
     }
 
-    var scaleX = float64(resolutionX) / float64(maxX)
-    var scaleY = float64(resolutionY) / float64(maxY)
+    // Firgure out what scale to apply
+    var scaleX = float64(resolutionX) / maxX
+    var scaleY = float64(resolutionY) / maxY
 
     var finalScale = scaleX
 
@@ -105,8 +110,34 @@ func main() {
         finalScale = scaleY
     }
 
-    for _, point := range points {
-        point.x = int(float64(point.x) * finalScale)
-        point.y = int(float64(point.y) * finalScale)
+    // Loop through and apply the scaling
+    for i := 0; i < len(points); i++ {
+        points[i].x = points[i].x * finalScale
+        points[i].y = points[i].y * finalScale
     }
+
+    dest := image.NewRGBA(image.Rect(0, 0, resolutionX, resolutionY))
+    gc := draw2dimg.NewGraphicContext(dest)
+
+    // Set some properties
+    gc.SetStrokeColor(color.RGBA{0xff, 0x44, 0xff, 0xff})
+    gc.SetLineWidth(5)
+
+    // Draw a closed shape
+
+
+    // Move to the first point
+    fmt.Print("Starting at ", float64(points[0].x), float64(points[0].y), "\n")
+    gc.MoveTo(float64(points[0].x), float64(points[0].y))
+
+    for _, point := range points {
+        fmt.Print("Drawing to ", float64(point.x), float64(point.y), "\n")
+        gc.LineTo(float64(point.x), float64(point.y))
+    }
+
+    // Finish drawing the line
+    gc.Stroke()
+
+    // Save to file
+    draw2dimg.SaveToPngFile("hello.png", dest)
 }
