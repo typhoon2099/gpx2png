@@ -100,7 +100,7 @@ func main() {
         }
     }
 
-    // Firgure out what scale to apply
+    // Figure out what scale to apply
     var scaleX = float64(resolutionX) / maxX
     var scaleY = float64(resolutionY) / maxY
 
@@ -110,10 +110,14 @@ func main() {
         finalScale = scaleY
     }
 
-    // Loop through and apply the scaling
+    // Now we know what scale to use, figure out how much translation need to be done in each direction
+    var translateX = (float64(resolutionX) - (maxX * finalScale)) / 2
+    var translateY = (float64(resolutionY) - (maxY * finalScale)) / 2
+
+    // Loop through and apply the scaling and translation
     for i := 0; i < len(points); i++ {
-        points[i].x = points[i].x * finalScale
-        points[i].y = points[i].y * finalScale
+        points[i].x = points[i].x * finalScale + translateX
+        points[i].y = points[i].y * finalScale + translateY
     }
 
     dest := image.NewRGBA(image.Rect(0, 0, resolutionX, resolutionY))
