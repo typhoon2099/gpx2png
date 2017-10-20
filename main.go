@@ -143,5 +143,5 @@ func main() {
     gc.Stroke()
 
     // Save to file
-    draw2dimg.SaveToPngFile("hello.png", dest)
+    draw2dimg.SaveToPngFile(filename + ".png", dest)
 }
