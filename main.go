@@ -13,10 +13,10 @@ import (
 )
 
 type Point struct {
-    latitude float64
+    latitude  float64
     longitude float64
-    x float64
-    y float64
+    x         float64
+    y         float64
 }
 
 func check(e error) {
@@ -128,45 +128,27 @@ func main() {
     gc := draw2dimg.NewGraphicContext(dest)
 
     if (outline == true) {
-        // Set some properties
-        gc.SetStrokeColor(color.RGBA{0x00, 0x00, 0x00, 0xff})
-        gc.SetLineWidth(float64(thickness * 2))
-
-        // Draw a closed shape
-
-
-        // Move to the first point
-        fmt.Print("Starting at ", float64(points[0].x), float64(points[0].y), "\n")
-        gc.MoveTo(float64(points[0].x), float64(points[0].y))
-
-        for _, point := range points {
-            fmt.Print("Drawing to ", float64(point.x), float64(point.y), "\n")
-            gc.LineTo(float64(point.x), float64(point.y))
-        }
-
-        // Finish drawing the line
-        gc.Stroke()
+        drawPoints(gc, points, float64(thickness * 2), color.RGBA{0x00, 0x00, 0x00, 0xff})
     }
 
-    // Set some properties
-    gc.SetStrokeColor(color.RGBA{0xff, 0x44, 0xff, 0xff})
-    gc.SetLineWidth(float64(thickness))
-
-    // Draw a closed shape
-
-
-    // Move to the first point
-    fmt.Print("Starting at ", float64(points[0].x), float64(points[0].y), "\n")
-    gc.MoveTo(float64(points[0].x), float64(points[0].y))
-
-    for _, point := range points {
-        fmt.Print("Drawing to ", float64(point.x), float64(point.y), "\n")
-        gc.LineTo(float64(point.x), float64(point.y))
-    }
-
-    // Finish drawing the line
-    gc.Stroke()
+    drawPoints(gc, points, float64(thickness), color.RGBA{0xff, 0x44, 0xff, 0xff})
 
     // Save to file
     draw2dimg.SaveToPngFile(filename + ".png", dest)
+}
+
+func drawPoints(image *draw2dimg.GraphicContext, points []Point, thickness float64, color color.RGBA) {
+    // Set some properties
+    image.SetStrokeColor(color)
+    image.SetLineWidth(float64(thickness))
+
+    // Move to the first point
+    image.MoveTo(float64(points[0].x), float64(points[0].y))
+
+    for _, point := range points {
+        image.LineTo(float64(point.x), float64(point.y))
+    }
+
+    // Finish drawing the line
+    image.Stroke()
 }
