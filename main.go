@@ -29,12 +29,16 @@ func main() {
     var filename string
     var resolutionX int
     var resolutionY int
+    var thickness int
+    var outline bool
     var points = make([]Point, 0)
 
     // Get the flags
     flag.StringVar(&filename, "i", "", "Filename")
     flag.IntVar(&resolutionX, "width", 1920, "Width")
     flag.IntVar(&resolutionY, "height", 1080, "Height")
+    flag.IntVar(&thickness, "thickness", 5, "Thickness")
+    flag.BoolVar(&outline, "outline", true, "Outline")
     flag.Parse()
 
     if filename == "" {
@@ -106,7 +110,7 @@ func main() {
 
     var finalScale = scaleX
 
-    if(scaleY < finalScale) {
+    if (scaleY < finalScale) {
         finalScale = scaleY
     }
 
@@ -123,9 +127,30 @@ func main() {
     dest := image.NewRGBA(image.Rect(0, 0, resolutionX, resolutionY))
     gc := draw2dimg.NewGraphicContext(dest)
 
+    if (outline == true) {
+        // Set some properties
+        gc.SetStrokeColor(color.RGBA{0x00, 0x00, 0x00, 0xff})
+        gc.SetLineWidth(float64(thickness * 2))
+
+        // Draw a closed shape
+
+
+        // Move to the first point
+        fmt.Print("Starting at ", float64(points[0].x), float64(points[0].y), "\n")
+        gc.MoveTo(float64(points[0].x), float64(points[0].y))
+
+        for _, point := range points {
+            fmt.Print("Drawing to ", float64(point.x), float64(point.y), "\n")
+            gc.LineTo(float64(point.x), float64(point.y))
+        }
+
+        // Finish drawing the line
+        gc.Stroke()
+    }
+
     // Set some properties
     gc.SetStrokeColor(color.RGBA{0xff, 0x44, 0xff, 0xff})
-    gc.SetLineWidth(5)
+    gc.SetLineWidth(float64(thickness))
 
     // Draw a closed shape
 
