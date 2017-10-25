@@ -135,16 +135,12 @@ func main() {
     //Apply the padding (later on we'll integrate it above, to do less calculations)
     var paddingReductionX = (float64(padding) / 100) * float64(resolutionX)
     var paddingReductionY = (float64(padding) / 100) * float64(resolutionY)
-    fmt.Println(paddingReductionX, paddingReductionY)
     var scale = 1 - float64(padding) / 50
 
     for i := 0; i < len(points); i++ {
-        //fmt.Println(points[i], float64(padding / 50))
         points[i].x = points[i].x * scale + paddingReductionX
         points[i].y = points[i].y * scale + paddingReductionY
-        //fmt.Println(points[i], "\n")
     }
-
 
     dest := image.NewRGBA(image.Rect(0, 0, resolutionX, resolutionY))
     gc := draw2dimg.NewGraphicContext(dest)
