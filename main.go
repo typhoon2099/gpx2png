@@ -31,6 +31,7 @@ func main() {
     var resolutionY int
     var thickness int
     var outline bool
+    var padding int
     var points = make([]Point, 0)
 
     // Get the flags
@@ -39,10 +40,17 @@ func main() {
     flag.IntVar(&resolutionY, "height", 1080, "Height")
     flag.IntVar(&thickness, "thickness", 5, "Thickness")
     flag.BoolVar(&outline, "outline", true, "Outline")
+    flag.IntVar(&padding, "padding", 10, "Padding")
     flag.Parse()
 
     if filename == "" {
         fmt.Println("\nPlease provide an file to parse")
+        flag.PrintDefaults()
+        os.Exit(1)
+    }
+
+    if (padding > 0 || padding >= 50) {
+        fmt.Println("\nPadding must be between 0 and 49")
         flag.PrintDefaults()
         os.Exit(1)
     }
@@ -123,6 +131,20 @@ func main() {
         points[i].x = points[i].x * finalScale + translateX
         points[i].y = points[i].y * finalScale + translateY
     }
+
+    //Apply the padding (later on we'll integrate it above, to do less calculations)
+    var paddingReductionX = (float64(padding) / 100) * float64(resolutionX)
+    var paddingReductionY = (float64(padding) / 100) * float64(resolutionY)
+    fmt.Println(paddingReductionX, paddingReductionY)
+    var scale = 1 - float64(padding) / 50
+
+    for i := 0; i < len(points); i++ {
+        //fmt.Println(points[i], float64(padding / 50))
+        points[i].x = points[i].x * scale + paddingReductionX
+        points[i].y = points[i].y * scale + paddingReductionY
+        //fmt.Println(points[i], "\n")
+    }
+
 
     dest := image.NewRGBA(image.Rect(0, 0, resolutionX, resolutionY))
     gc := draw2dimg.NewGraphicContext(dest)
