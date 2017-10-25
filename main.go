@@ -49,7 +49,7 @@ func main() {
         os.Exit(1)
     }
 
-    if (padding > 0 || padding >= 50) {
+    if (padding < 0 || padding >= 50) {
         fmt.Println("\nPadding must be between 0 and 49")
         flag.PrintDefaults()
         os.Exit(1)
@@ -122,6 +122,9 @@ func main() {
         finalScale = scaleY
     }
 
+    // Scale to account for padding
+    finalScale = finalScale * (1 - float64(padding) / 50)
+
     // Now we know what scale to use, figure out how much translation need to be done in each direction
     var translateX = (float64(resolutionX) - (maxX * finalScale)) / 2
     var translateY = (float64(resolutionY) - (maxY * finalScale)) / 2
@@ -130,16 +133,6 @@ func main() {
     for i := 0; i < len(points); i++ {
         points[i].x = points[i].x * finalScale + translateX
         points[i].y = points[i].y * finalScale + translateY
-    }
-
-    //Apply the padding (later on we'll integrate it above, to do less calculations)
-    var paddingReductionX = (float64(padding) / 100) * float64(resolutionX)
-    var paddingReductionY = (float64(padding) / 100) * float64(resolutionY)
-    var scale = 1 - float64(padding) / 50
-
-    for i := 0; i < len(points); i++ {
-        points[i].x = points[i].x * scale + paddingReductionX
-        points[i].y = points[i].y * scale + paddingReductionY
     }
 
     dest := image.NewRGBA(image.Rect(0, 0, resolutionX, resolutionY))
