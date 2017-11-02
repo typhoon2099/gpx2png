@@ -8,6 +8,7 @@ import (
     "io/ioutil"
     "math"
     "github.com/llgcode/draw2d/draw2dimg"
+    "github.com/llgcode/draw2d/draw2dkit"
     "image"
     "image/color"
 )
@@ -140,9 +141,31 @@ func main() {
 
     if (outline == true) {
         drawPoints(gc, points, float64(thickness * 2), color.RGBA{0x00, 0x00, 0x00, 0xff})
+
+        // Draw an outline for the start point
+        gc.SetFillColor(color.RGBA{0x00, 0x00, 0x00, 0xff})
+        draw2dkit.Circle(gc, points[0].x, points[0].y, float64(thickness) * 2.5)
+        gc.Fill()
+
+        // Draw an outline for the end point
+        gc.SetFillColor(color.RGBA{0x00, 0x00, 0x00, 0xff})
+        draw2dkit.Circle(gc, points[len(points)-1].x, points[len(points)-1].y, float64(thickness) * 2.5)
+        gc.Fill()
     }
 
     drawPoints(gc, points, float64(thickness), color.RGBA{0xff, 0x44, 0xff, 0xff})
+
+    // Draw a spot at the start of the route
+    gc.SetFillColor(color.RGBA{0x00, 0xff, 0x00, 0xff})
+    //gc.SetLineWidth(float64(thickness))
+    draw2dkit.Circle(gc, points[0].x, points[0].y, float64(thickness * 2))
+    gc.Fill()
+
+    // Draw a spot at the end of the route
+    gc.SetFillColor(color.RGBA{0xff, 0x00, 0x00, 0xff})
+    //gc.SetLineWidth(float64(thickness))
+    draw2dkit.Circle(gc, points[len(points)-1].x, points[len(points)-1].y, float64(thickness * 2))
+    gc.Fill()
 
     // Save to file
     draw2dimg.SaveToPngFile(filename + ".png", dest)
