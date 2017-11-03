@@ -30,7 +30,7 @@ func main() {
     var filename string
     var resolutionX int
     var resolutionY int
-    var thickness int
+    var thickness float64
     var outline bool
     var padding int
     var points = make([]Point, 0)
@@ -39,7 +39,7 @@ func main() {
     flag.StringVar(&filename, "i", "", "Filename")
     flag.IntVar(&resolutionX, "width", 1920, "Width")
     flag.IntVar(&resolutionY, "height", 1080, "Height")
-    flag.IntVar(&thickness, "thickness", 5, "Thickness")
+    flag.Float64Var(&thickness, "thickness", 5, "Thickness")
     flag.BoolVar(&outline, "outline", true, "Outline")
     flag.IntVar(&padding, "padding", 10, "Padding")
     flag.Parse()
@@ -140,32 +140,16 @@ func main() {
     gc := draw2dimg.NewGraphicContext(dest)
 
     if (outline == true) {
-        drawPoints(gc, points, float64(thickness * 2), color.RGBA{0x00, 0x00, 0x00, 0xff})
-
-        // Draw an outline for the start point
-        gc.SetFillColor(color.RGBA{0x00, 0x00, 0x00, 0xff})
-        draw2dkit.Circle(gc, points[0].x, points[0].y, float64(thickness) * 2.5)
-        gc.Fill()
-
-        // Draw an outline for the end point
-        gc.SetFillColor(color.RGBA{0x00, 0x00, 0x00, 0xff})
-        draw2dkit.Circle(gc, points[len(points)-1].x, points[len(points)-1].y, float64(thickness) * 2.5)
-        gc.Fill()
+        drawPoints(gc, points, thickness * 2, color.RGBA{0x00, 0x00, 0x00, 0xff})
     }
 
-    drawPoints(gc, points, float64(thickness), color.RGBA{0xff, 0x44, 0xff, 0xff})
+    drawPoints(gc, points, thickness, color.RGBA{0xff, 0x44, 0xff, 0xff})
 
     // Draw a spot at the start of the route
-    gc.SetFillColor(color.RGBA{0x00, 0xff, 0x00, 0xff})
-    //gc.SetLineWidth(float64(thickness))
-    draw2dkit.Circle(gc, points[0].x, points[0].y, float64(thickness * 2))
-    gc.Fill()
+    drawSpot(gc, points[0], thickness, color.RGBA{0x00, 0xff, 0x00, 0xff})
 
     // Draw a spot at the end of the route
-    gc.SetFillColor(color.RGBA{0xff, 0x00, 0x00, 0xff})
-    //gc.SetLineWidth(float64(thickness))
-    draw2dkit.Circle(gc, points[len(points)-1].x, points[len(points)-1].y, float64(thickness * 2))
-    gc.Fill()
+    drawSpot(gc, points[len(points)-1], thickness, color.RGBA{0xff, 0x00, 0x00, 0xff})
 
     // Save to file
     draw2dimg.SaveToPngFile(filename + ".png", dest)
@@ -174,7 +158,7 @@ func main() {
 func drawPoints(image *draw2dimg.GraphicContext, points []Point, thickness float64, color color.RGBA) {
     // Set some properties
     image.SetStrokeColor(color)
-    image.SetLineWidth(float64(thickness))
+    image.SetLineWidth(thickness)
 
     // Move to the first point
     image.MoveTo(float64(points[0].x), float64(points[0].y))
@@ -185,4 +169,14 @@ func drawPoints(image *draw2dimg.GraphicContext, points []Point, thickness float
 
     // Finish drawing the line
     image.Stroke()
+}
+
+func drawSpot(image *draw2dimg.GraphicContext, point Point, thickness float64, spotColor color.RGBA) {
+    image.SetFillColor(color.RGBA{0xff, 0xff, 0xff, 0xff})
+    draw2dkit.Circle(image, point.x, point.y, thickness * 2.5)
+    image.Fill()
+
+    image.SetFillColor(spotColor)
+    draw2dkit.Circle(image, point.x, point.y, thickness * 2)
+    image.Fill()
 }
